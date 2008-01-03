@@ -1,0 +1,4 @@
+[ ] make mapping cleverer, including regexes
+[ ] make colours customisable
+[ ] allow jids to filter (include) on the command line e.g. clix twitter@twitter.com zomojo.com 
+[ ] add exclude option, to invert previous (clix -X twitter.com)
