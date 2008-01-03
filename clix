@@ -13,9 +13,6 @@ use Term::ANSIColor;
 use Term::Size;
 use Time::Piece;
 
-use vars qw($VERSION);
-$VERSION = 0.001;
-
 my %opts = ();
 getopts('u:v', \%opts);
 my $user = $opts{u};
@@ -71,21 +68,30 @@ $c->reg_cb (
    message => sub {
       my ($c, $acc, $msg) = @_;
       my $body = $msg->any_body || return;
+      chomp $body;
       my $jid = $msg->from;
       my $bare_jid = $jid;
       $bare_jid =~ s!/ [^/]+$ !!x;
-      print color 'bold white';
+      print color 'white';
       printf "(%s) ", localtime->strftime('%T');
       if (exists $map{ $bare_jid }) {
-        print color 'bold yellow';
+        print color 'cyan';
         printf "[%s] ", $map{ $bare_jid };
       }
       else {
-        print color 'bold cyan';
+        print color 'cyan';
         printf "%s: ", $bare_jid;
       }
-      print color 'bold green'; 
-      print $body;
+      if ($body =~ m/^(\S+:)(.*?)$/) {
+        print color 'yellow';
+        print $1;
+        print color 'green';
+        print $2;
+      }
+      else {
+        print color 'green'; 
+        print $body;
+      }
       print color 'reset';
       print "\n";
    }
