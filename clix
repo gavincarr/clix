@@ -110,7 +110,34 @@ clix - a read-only command-line XMPP client
 
 =head1 DESCRIPTION
 
-clix is a read-only command-line XMPP client.
+clix is a read-only command-line XMPP client. It is intended for simple
+merging/monitoring tasks, such as following twitter and RSS feeds via 
+XMPP.
+
+=head2 CONFIGURATION
+
+clix requires a config file called .clixrc on your home directory, 
+containing a set of jabber accounts to connect to. This is just an 
+ini-style config like the following:
+
+    [gavin1]
+    user = gavin@example.com
+    pass = password1
+
+    [jabber]
+    user = openfusion@jabber.org
+    pass = password2
+
+    [google]
+    user = something@gmail.com
+    pass = password3
+
+By default, clix tries to connect to all accounts. You can restrict to just
+a single account by specifying a user section name via '-u' e.g.
+
+    clix -u gavin1
+
+for the example above.
 
 =head1 AUTHOR
 
@@ -124,5 +151,3 @@ This program is free software, licensed under the terms of the GNU
 General Public License v2.
 
 =cut
-
-
