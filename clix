@@ -53,6 +53,7 @@ for ( @$user ) {
   next unless $jid && $pass;
   $c->add_account( $jid, $pass, undef, undef, { resource => 'clix' });
 }
+my $account_cnt = scalar $c->get_accounts();
 
 binmode(STDOUT, ':utf8');
 
@@ -64,9 +65,13 @@ $c->reg_cb (
    },
    disconnect => sub {
       my ($c, $acc, $h, $p, $reason) = @_;
-      printf "Disconnected: %s (%s:%s): %s\n", $acc->bare_jid, $h, $p, $reason;
-      sleep 2;
-      $c->update_connections;
+      printf "Disconnected: %s (%s:%s)%s\n", $acc->bare_jid, $h, $p, $reason ? ": $reason" : '';
+      my $attempts = 0;
+      do {
+        sleep 2;
+        $c->update_connections;
+        $attempts++;
+      } unless $attempts >= 4 || scalar($c->get_connected_accounts()) == $account_cnt;
    },
    error => sub {
       my ($c, $acc, $err) = @_;
