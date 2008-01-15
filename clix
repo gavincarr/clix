@@ -94,7 +94,7 @@ $c->reg_cb (
         print color 'cyan';
         printf "%s: ", $bare_jid;
       }
-      if ($body =~ m/^(\S+:)(.*?)$/) {
+      if ($body =~ m/^(\S+:)(.*?)$/s) {
         print color 'yellow';
         print $1;
         print color 'green';
