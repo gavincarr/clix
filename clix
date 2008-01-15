@@ -13,6 +13,9 @@ use Term::ANSIColor;
 use Term::Size;
 use Time::Piece;
 
+use vars qw($VERSION);
+$VERSION = 0.001004;
+
 my %opts = ();
 getopts('u:v', \%opts);
 my $user = $opts{u};
@@ -51,15 +54,19 @@ for ( @$user ) {
   $c->add_account( $jid, $pass, undef, undef, { resource => 'clix' });
 }
 
+binmode(STDOUT, ':utf8');
+
 # Register callbacks
 $c->reg_cb (
    session_ready => sub {
       my ($c, $acc) = @_;
-      printf "+ session up (%s)\n", $acc->bare_jid if $verbose;
+      printf "Connected: %s\n", $acc->bare_jid;
    },
    disconnect => sub {
-      my ($c, $acc, $h, $p, $reas) = @_;
-      print "+ disconnect ($h:$p): $reas\n" if $verbose;
+      my ($c, $acc, $h, $p, $reason) = @_;
+      printf "Disconnected: %s (%s:%s): %s\n", $acc->bare_jid, $h, $p, $reason;
+      sleep 2;
+      $c->update_connections;
    },
    error => sub {
       my ($c, $acc, $err) = @_;
