@@ -18,13 +18,16 @@ our @EXPORT_OK = qw(colourise _colourise_msg _colourise_snippet);
 
 my %COLOUR = (
   mb_mine       => 'white',
-  mb_reply      => 'red',
+  mb_reply      => 'green bold',
   mb_base       => 'green',
   im_base       => 'magenta',
-  uri           => 'magenta',
+  uri           => 'red',
   im_base_uri   => 'green',
-  person        => 'yellow',
+  person        => 'magenta',
   hashtag       => 'cyan',
+  timestamp     => 'white',
+  from_jid      => 'cyan',
+  mb_sender     => 'yellow',
 );
 
 sub _colourise_snippet {
@@ -55,7 +58,7 @@ sub _colourise_msg {
         if $msg =~ m/\G(\@#?[-\w]+\s*)/gc;
     $out .= _colourise_snippet($1, $COLOUR{hashtag}, report_colours => $report_colours),
       redo TOKEN
-        if $msg =~ m/\G(\#[-\w]+\s*)/gc;
+        if $msg =~ m/\G(\#[-\w.]+\s*)/gc;
     $out .= _colourise_snippet($1, $COLOUR{uri}, report_colours => $report_colours),
       redo TOKEN
         if $msg =~ m/\G($RE{URI}\s*)/gc;
@@ -76,16 +79,16 @@ sub colourise {
   my $mb_username = delete $opts{mb_username};
   croak "Invalid options to colourise: " . join(',',keys %opts) if keys %opts;
 
-  print color 'white';
+  print color $COLOUR{timestamp};
   printf "(%s) ", localtime->strftime('%T');
 
-  print color 'cyan';
+  print color $COLOUR{from_jid};
   printf "[%s] ", $mapped_jid;
 
   # If this is a microblog account, we jump through special hoops
   if ($mb_username) {
     if ($msg =~ m/^(([-\w]+):\s*)(.*?)$/s) {
-      print color 'yellow';
+      print color $COLOUR{mb_sender};
       print $1;
       my $username = $2;
       if ($username eq $mb_username) {
