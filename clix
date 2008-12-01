@@ -51,17 +51,18 @@ push @map, ref $config{DEFAULTS}{map} ? @{$config{DEFAULTS}{map}} : $config{DEFA
 push @map, ref $config{$user}{map} ? @{$config{$user}{map}} : $config{$user}{map}
   if $config{$user}{map};
 my %map = map { split /\s*:\s*/, $_, 2 } @map;
-print "+ mappings:\n" . join("\n", map { "  $_: $map{$_}" } keys %map) . "\n"
-  if $verbose;
+print STDERR "+ mappings:\n" . join("\n", map { "  $_: $map{$_}" } keys %map) . "\n"
+  if keys %map && $verbose;
 
 # Setup microblog jids
-my %microblog = ();
-%microblog = map { $_ => 1 }
-  ref $config{DEFAULTS}{microblog} ?  
-    @{$config{DEFAULTS}{microblog}} : 
-    ( $config{DEFAULTS}{microblog} )
+my @microblog = ();
+push @microblog, ref $config{DEFAULTS}{microblog} ? 
+  @{$config{DEFAULTS}{microblog}} : 
+  $config{DEFAULTS}{microblog}
     if $config{DEFAULTS}{microblog};
-print "+ microblog JIDs: " . join(', ', keys %microblog) . "\n" if $verbose;
+my %microblog = map { split /\s*:\s*/, $_, 2 } @microblog;
+print STDERR "+ microblogs:\n" . join("\n", map { "  $_: $microblog{$_}" } keys %microblog) . "\n"
+  if keys %microblog && $verbose;
 
 exit 0 if $noop;
 
@@ -83,20 +84,19 @@ binmode(STDOUT, ':utf8');
 
 sub colourise_msg {
   my ($msg, $base_colour) = @_;
-
   print color $base_colour;
   print $msg;
 }
 
 # Colourise and print a given message
 sub colourise {
-  my ($jid, $msg) = @_;
+  my ($jid, $mapped_jid, $msg) = @_;
 
   print color 'white';
   printf "(%s) ", localtime->strftime('%T');
 
   print color 'cyan';
-  printf "[%s] ", $jid;
+  printf "[%s] ", $mapped_jid;
 
   if ($microblog{ $jid }) {
     if ($msg =~ m/^(\S+:\s*)(.*?)$/s) {
@@ -110,7 +110,7 @@ sub colourise {
   }
   
   else {
-    colourise_msg( $msg, 'magneta' );
+    colourise_msg( $msg, 'magenta' );
   }
 
   print color 'reset';
@@ -144,8 +144,8 @@ $c->reg_cb (
       my $jid = $msg->from;
       my $bare_jid = $jid;
       $bare_jid =~ s!/ [^/]+$ !!x;
-      $bare_jid = $map{ $bare_jid } if exists $map{ $bare_jid };
-      colourise( $bare_jid, $body );
+      my $mapped_jid = $map{ $bare_jid } || $bare_jid;
+      colourise( $bare_jid, $mapped_jid, $body );
    }
 );
 $c->start;
