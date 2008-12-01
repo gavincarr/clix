@@ -36,7 +36,7 @@ sub _colourise_snippet {
     return "$colour: $snippet\n";
   }
   else {
-    return color $colour . $snippet;
+    return color($colour) . $snippet;
   }
 }
 
