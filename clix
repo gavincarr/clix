@@ -98,11 +98,20 @@ sub colourise {
   print color 'cyan';
   printf "[%s] ", $mapped_jid;
 
-  if ($microblog{ $jid }) {
-    if ($msg =~ m/^(\S+:\s*)(.*?)$/s) {
+  if (my $my_username = $microblog{ $jid }) {
+    if ($msg =~ m/^(([-\w]+):\s*)(.*?)$/s) {
+      my $username = $1;
       print color 'yellow';
-      print $1;
-      colourise_msg( $2, 'green' );
+      print $2;
+      if ($username eq $my_username) {
+        colourise_msg( $3, 'white' );
+      }
+      elsif ($msg =~ m/\@$my_username\b/) {
+        colourise_msg( $3, 'red' );
+      }
+      else {
+        colourise_msg( $3, 'green' );
+      }
     }
     else {
       colourise_msg( $msg, 'green' );
