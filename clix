@@ -5,7 +5,7 @@
 
 use strict;
 
-use Getopt::Std;
+use Getopt::Long qw(:config no_ignore_case bundling);
 use Config::Std;
 use AnyEvent;
 use Net::XMPP2::Client;
@@ -16,10 +16,17 @@ use Time::Piece;
 use vars qw($VERSION);
 $VERSION = 0.001004;
 
-my %opts = ();
-getopts('u:v', \%opts);
-my $user = $opts{u};
-my $verbose = $opts{v};
+sub usage {
+  die "usage: " . basename($0) . " [-n] [-v] [-u <user>]\n";
+}
+
+my ($user, $noop, $verbose);
+usage 
+unless GetOptions(
+  'user|u=s'    => \$user,
+  'noop|n'      => \$noop,
+  'verbose|v+'  => \$verbose,
+);
 
 die "Missing \$ENV{HOME}/.clixrc file\n" unless -f "$ENV{HOME}/.clixrc";
 read_config "$ENV{HOME}/.clixrc" => my %config;
@@ -30,7 +37,7 @@ $user ||= $config{DEFAULTS}{user};
 if ($user) {
   $user = [ $user ] unless ref $user;
 } else {
-  $user = [ grep !/DEFAULTS/, sort keys %config ];
+  $user = [ grep !/^(DEFAULTS)$/, sort keys %config ];
 }
 
 # Setup short jid mappings
@@ -40,6 +47,19 @@ push @map, ref $config{DEFAULTS}{map} ? @{$config{DEFAULTS}{map}} : $config{DEFA
 push @map, ref $config{$user}{map} ? @{$config{$user}{map}} : $config{$user}{map}
   if $config{$user}{map};
 my %map = map { split /\s*:\s*/, $_, 2 } @map;
+print "+ mappings:\n" . join("\n", map { "  $_: $map{$_}" } keys %map) . "\n"
+  if $verbose;
+
+# Setup microblog jids
+my %microblog = ();
+%microblog = map { $_ => 1 }
+  ref $config{DEFAULTS}{microblog} ?  
+    @{$config{DEFAULTS}{microblog}} : 
+    ( $config{DEFAULTS}{microblog} )
+    if $config{DEFAULTS}{microblog};
+print "+ microblog JIDs: " . join(', ', keys %microblog) . "\n" if $verbose;
+
+exit 0 if $noop;
 
 # Initial Setup
 $SIG{INT} = \&disconnect;
@@ -143,7 +163,7 @@ containing a set of jabber accounts to connect to. This is just an
 ini-style config like the following:
 
     [gavin1]
-    user = gavin@example.com
+    user = gavin@openfusion.com.au
     pass = password1
 
     [jabber]
@@ -151,7 +171,7 @@ ini-style config like the following:
     pass = password2
 
     [google]
-    user = something@gmail.com
+    user = somethingelse@gmail.com
     pass = password3
 
 By default, clix tries to connect to all accounts. You can restrict to just
@@ -167,7 +187,7 @@ Gavin Carr <gavin@openfusion.com.au>
 
 =head1 LICENSE
 
-Copyright 2007 Open Fusion Pty. Ltd.
+Copyright 2007-2008 Open Fusion Pty. Ltd.
 
 This program is free software, licensed under the terms of the GNU
 General Public License v2.
