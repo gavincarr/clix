@@ -80,7 +80,7 @@ sub colourise {
   croak "Invalid options to colourise: " . join(',',keys %opts) if keys %opts;
 
   print color $COLOUR{timestamp};
-  printf "(%s) ", localtime->strftime('%T');
+  printf "%s ", localtime->strftime('%T');
 
   print color $COLOUR{from_jid};
   printf "[%s] ", $mapped_jid;
