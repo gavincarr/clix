@@ -7,19 +7,65 @@ package Clix;
 
 use strict;
 
-use Exporter::Lite;
+use Exporter;
 use Term::ANSIColor;
-use Term::Size;
 use Time::Piece;
 use Carp;
+use Regexp::Common qw(URI);
 
 our @EXPORT = qw(colourise);
-our @EXPORT_OK = qw(colourise);
+our @EXPORT_OK = qw(colourise _colourise_msg _colourise_snippet);
+
+my %COLOUR = (
+  mb_mine       => 'white',
+  mb_reply      => 'red',
+  mb_base       => 'green',
+  im_base       => 'magenta',
+  uri           => 'magenta',
+  im_base_uri   => 'green',
+  person        => 'yellow',
+  hashtag       => 'cyan',
+);
+
+sub _colourise_snippet {
+  my ($snippet, $colour, %opts) = @_;
+  my $report_colours = delete $opts{report_colours};
+  croak "Invalid options to _colourise_snippet: " . join(',',keys %opts) if keys %opts;
+
+  if ($report_colours) {         # Testing
+    return "$colour: $snippet\n";
+  }
+  else {
+    return color $colour . $snippet;
+  }
+}
 
 sub _colourise_msg {
-  my ($msg, $base_colour) = @_;
-  print color $base_colour;
-  print $msg;
+  my ($msg, %opts) = @_;
+  my $base_colour = delete $opts{base} || 'im_base';
+  my $report_colours = delete $opts{report_colours};
+  croak "Invalid base colour: $base_colour" unless exists $COLOUR{$base_colour};
+  croak "Invalid options to _colourise_msg: " . join(',',keys %opts) if keys %opts;
+
+  # Tokenise $msg into snippets
+  my $out = '';
+  TOKEN: {
+    $out .= _colourise_snippet($1, $COLOUR{person}, report_colours => $report_colours),
+      redo TOKEN
+        if $msg =~ m/\G(\@#?[-\w]+\s*)/gc;
+    $out .= _colourise_snippet($1, $COLOUR{hashtag}, report_colours => $report_colours),
+      redo TOKEN
+        if $msg =~ m/\G(\#[-\w]+\s*)/gc;
+    $out .= _colourise_snippet($1, $COLOUR{uri}, report_colours => $report_colours),
+      redo TOKEN
+        if $msg =~ m/\G($RE{URI}\s*)/gc;
+    $out .= _colourise_snippet($1, $COLOUR{$base_colour}, report_colours => $report_colours),
+      redo TOKEN
+        if $msg =~ m/\G(\S+\s*)/gc;
+  }
+ 
+  return $out if $report_colours;
+  print $out;
 }
 
 # Colourise and print a given message
@@ -43,22 +89,22 @@ sub colourise {
       print $1;
       my $username = $2;
       if ($username eq $mb_username) {
-        _colourise_msg( $3, 'white' );
+        _colourise_msg( $3, base => 'mb_mine');
       }
       elsif ($msg =~ m/\@$mb_username\b/) {
-        _colourise_msg( $3, 'red' );
+        _colourise_msg( $3, base => 'mb_reply' );
       }
       else {
-        _colourise_msg( $3, 'green' );
+        _colourise_msg( $3, base => 'mb_base' );
       }
     }
     else {
-      _colourise_msg( $msg, 'green' );
+      _colourise_msg( $msg, base => 'mb_base' );
     }
   }
   
   else {
-    _colourise_msg( $msg, 'magenta' );
+    _colourise_msg( $msg, base => 'im_base' );
   }
 
   print color 'reset';
