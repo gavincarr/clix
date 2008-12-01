@@ -1,6 +1,7 @@
 - the colours version:
   o distinguish between IM and MB type accounts, and colour differently
-  o for MB accounts, highlight @usernames and #hashtags and $symbols
+    x base colours: IM (magenta), MB, (green) MB reply (red), MB yours (white)
+  o for MB accounts, highlight @usernames (yellow) and #hashtags (magenta) and $symbols (magenta)
   o highlight URLs
   o colour your MBs differently
   o colour replies to you differently
