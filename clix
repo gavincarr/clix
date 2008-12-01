@@ -10,9 +10,7 @@ use Config::Std;
 use File::Basename;
 use AnyEvent;
 use Net::XMPP2::Client;
-use Term::ANSIColor;
-use Term::Size;
-use Time::Piece;
+use Clix;
 
 use vars qw($VERSION);
 $VERSION = 0.002;
@@ -82,50 +80,6 @@ my $account_cnt = scalar $c->get_accounts();
 
 binmode(STDOUT, ':utf8');
 
-sub colourise_msg {
-  my ($msg, $base_colour) = @_;
-  print color $base_colour;
-  print $msg;
-}
-
-# Colourise and print a given message
-sub colourise {
-  my ($jid, $mapped_jid, $msg) = @_;
-
-  print color 'white';
-  printf "(%s) ", localtime->strftime('%T');
-
-  print color 'cyan';
-  printf "[%s] ", $mapped_jid;
-
-  if (my $my_username = $microblog{ $jid }) {
-    if ($msg =~ m/^(([-\w]+):\s*)(.*?)$/s) {
-      my $username = $1;
-      print color 'yellow';
-      print $2;
-      if ($username eq $my_username) {
-        colourise_msg( $3, 'white' );
-      }
-      elsif ($msg =~ m/\@$my_username\b/) {
-        colourise_msg( $3, 'red' );
-      }
-      else {
-        colourise_msg( $3, 'green' );
-      }
-    }
-    else {
-      colourise_msg( $msg, 'green' );
-    }
-  }
-  
-  else {
-    colourise_msg( $msg, 'magenta' );
-  }
-
-  print color 'reset';
-  print "\n";
-}
-
 # Register callbacks
 $c->reg_cb (
    session_ready => sub {
@@ -154,7 +108,8 @@ $c->reg_cb (
       my $bare_jid = $jid;
       $bare_jid =~ s!/ [^/]+$ !!x;
       my $mapped_jid = $map{ $bare_jid } || $bare_jid;
-      colourise( $bare_jid, $mapped_jid, $body );
+      colourise( $body, jid => $bare_jid, mapped_jid => $mapped_jid, 
+        mb_username => $microblog{ $bare_jid } );
    }
 );
 $c->start;
