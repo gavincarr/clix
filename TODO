@@ -4,6 +4,7 @@
   + for MB accounts, highlight @usernames (yellow) and #hashtags (magenta) and $symbols (magenta)
   + highlight URLs
 - make colours customisable
+- add Module::Install magic and release to cpan
 - make a POE command line version, allowing sending
 - make mapping cleverer, including regexes
 - allow jids to filter (include) on the command line e.g. clix twitter@twitter.com zomojo.com 

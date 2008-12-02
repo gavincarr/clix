@@ -13,7 +13,7 @@ use Net::XMPP2::Client;
 use Clix;
 
 use vars qw($VERSION);
-$VERSION = 0.002003;
+$VERSION = 0.002004;
 
 sub usage {
   die "usage: " . basename($0) . " [-n] [-v] [-u <user>]\n";
