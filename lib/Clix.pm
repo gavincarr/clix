@@ -91,14 +91,15 @@ sub colourise {
       print color $COLOUR{mb_sender};
       print $1;
       my $username = $2;
+      $msg = $3;
       if ($username eq $mb_username) {
-        _colourise_msg( $3, base => 'mb_mine');
+        _colourise_msg( $msg, base => 'mb_mine');
       }
       elsif ($msg =~ m/\@$mb_username\b/) {
-        _colourise_msg( $3, base => 'mb_reply' );
+        _colourise_msg( $msg, base => 'mb_reply' );
       }
       else {
-        _colourise_msg( $3, base => 'mb_base' );
+        _colourise_msg( $msg, base => 'mb_base' );
       }
     }
     else {
