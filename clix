@@ -85,6 +85,10 @@ $c->reg_cb (
    session_ready => sub {
       my ($c, $acc) = @_;
       printf "Connected: %s\n", $acc->bare_jid;
+      if ($verbose >= 2) {
+        my $roster = $acc->connection->get_roster;
+        $roster->debug_dump;
+      }
    },
    disconnect => sub {
       my ($c, $acc, $h, $p, $reason) = @_;
@@ -96,9 +100,37 @@ $c->reg_cb (
         $attempts++;
       } unless $attempts >= 4 || scalar($c->get_connected_accounts()) == $account_cnt;
    },
+   roster_error => sub {
+      my ($c, $acc, $err) = @_;
+      print "RosterError: " . $err->string . "\n";
+   },
+   presence_error => sub {
+      my ($c, $acc, $err) = @_;
+      print "PresenceError: " . $err->string . "\n";
+   },
+   message_error => sub {
+      my ($c, $acc, $err) = @_;
+      print "MessageError: " . $err->string . "\n";
+   },
    error => sub {
       my ($c, $acc, $err) = @_;
       print "Error: " . $err->string . "\n";
+   },
+   contact_request_subscribe => sub {
+      my ($c, $acc, $roster, $contact) = @_;
+      printf "RequestSubscribe: %s->%s, current %s\n", $contact->jid, $acc->bare_jid, $contact->subscription if $verbose;
+      $contact->send_subscribed;
+      $contact->send_subscribe;
+   },
+   contact_did_unsubscribe => sub {
+      my ($c, $acc, $roster, $contact) = @_;
+      printf "ContactDidUnsubscribe: %s unsubscribed from %s presence, reciprocating\n", $contact->jid, $acc->bare_jid if $verbose;
+      $contact->send_unsubscribe;
+   },
+   contact_unsubscribed => sub {
+      my ($c, $acc, $roster, $contact) = @_;
+      printf "ContactUnsubscribed: %s unsubscribed %s from his/her presence, reciprocating\n", $contact->jid, $acc->bare_jid if $verbose;
+      $contact->send_unsubscribed;
    },
    message => sub {
       my ($c, $acc, $msg) = @_;
