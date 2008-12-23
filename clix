@@ -19,10 +19,11 @@ sub usage {
   die "usage: " . basename($0) . " [-n] [-v] [-u <user>]\n";
 }
 
-my ($user, $help, $noop, $verbose);
+my ($user, @ignore_user, $help, $noop, $verbose);
 usage 
   unless GetOptions(
     'user|u=s'    => \$user,
+    'ignore-user|ignore|U=s@' => \@ignore_user,
     'help|h'      => \$help,
     'noop|n'      => \$noop,
     'verbose|v+'  => \$verbose,
@@ -35,12 +36,14 @@ read_config "$ENV{HOME}/.clixrc" => my %config;
 die "Error reading \$ENV{HOME}/.clixrc: $!" unless keys %config;
 
 # Use DEFAULTS user if defined, otherwise connect to all defined accounts
+my %ignore_user = map { $_ => 1 } @ignore_user;
 $user ||= $config{DEFAULTS}{user};
 if ($user) {
   $user = [ $user ] unless ref $user;
 } else {
-  $user = [ grep !/^(DEFAULTS)$/, sort keys %config ];
+  $user = [ grep { ! exists $ignore_user{$_} } grep !/^(DEFAULTS)$/, sort keys %config ];
 }
+#printf "+ user accounts: %s\n", join(', ', @$user);
 
 # Setup short jid mappings
 my @map = ();
