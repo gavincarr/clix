@@ -24,6 +24,7 @@ my %COLOUR = (
   uri           => 'red',
   im_base_uri   => 'green',
   person        => 'magenta',
+  group         => 'cyan',
   hashtag       => 'cyan',
   timestamp     => 'white',
   from_jid      => 'cyan',
@@ -59,6 +60,9 @@ sub _colourise_msg {
     $out .= _colourise_snippet($1, $COLOUR{hashtag}, report_colours => $report_colours),
       redo TOKEN
         if $msg =~ m/\G(\#[-\w.]+\s*)/gc;
+    $out .= _colourise_snippet($1, $COLOUR{group}, report_colours => $report_colours),
+      redo TOKEN
+        if $msg =~ m/\G(![-\w.]+\s*)/gc;
     $out .= _colourise_snippet($1, $COLOUR{uri}, report_colours => $report_colours),
       redo TOKEN
         if $msg =~ m/\G($RE{URI}\s*)/gc;
