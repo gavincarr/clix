@@ -3,7 +3,11 @@
     x base colours: IM (magenta), MB, (green) MB reply (red), MB yours (white)
   + for MB accounts, highlight @usernames (yellow) and #hashtags (magenta) and $symbols (magenta)
   + highlight URLs
+
+
+- add initial_presence setting and expose somehow
 - make colours customisable
+
 - add Module::Install magic and release to cpan
 - make a POE command line version, allowing sending
 - make mapping cleverer, including regexes
