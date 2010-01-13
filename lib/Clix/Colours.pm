@@ -3,7 +3,7 @@
 # Colour routines for clix, the command-line XMPP client
 #
 
-package Clix;
+package Clix::Colours;
 
 use strict;
 
@@ -13,23 +13,27 @@ use Time::Piece;
 use Carp;
 use Regexp::Common qw(URI);
 
-our @EXPORT = qw(colourise);
-our @EXPORT_OK = qw(colourise _colourise_msg _colourise_snippet);
+our @EXPORT = ();
+our @EXPORT_OK = qw(merge_colours colourise);
 
 my %COLOUR = (
-  mb_mine       => 'white',
-  mb_reply      => 'green bold',
-  mb_base       => 'green',
-  im_base       => 'yellow',
-  uri           => 'red',
-  im_base_uri   => 'green',
-  person        => 'magenta',
-  group         => 'cyan',
-  hashtag       => 'cyan',
   timestamp     => 'white',
   from_jid      => 'cyan',
   mb_sender     => 'yellow',
+  im_msg        => 'green',
+  mb_msg        => 'green',
+  mb_reply      => 'red bold',
+  mb_mine       => 'white bold',
+  uri           => 'red',
+  person        => 'cyan',
+  hashtag       => 'magenta',
+  group         => 'magenta',
 );
+
+sub merge_colours {
+  my ($user_colours) = @_;
+  @COLOUR{ keys %$user_colours } = values %$user_colours;
+}
 
 sub _colourise_snippet {
   my ($snippet, $colour, %opts) = @_;
@@ -46,9 +50,9 @@ sub _colourise_snippet {
 
 sub _colourise_msg {
   my ($msg, %opts) = @_;
-  my $base_colour = delete $opts{base} || 'im_base';
+  my $msg_colour = delete $opts{msg} || 'im_msg';
   my $report_colours = delete $opts{report_colours};
-  croak "Invalid base colour: $base_colour" unless exists $COLOUR{$base_colour};
+  croak "Invalid msg colour: $msg_colour" unless exists $COLOUR{$msg_colour};
   croak "Invalid options to _colourise_msg: " . join(',',keys %opts) if keys %opts;
 
   # Tokenise $msg into snippets
@@ -66,7 +70,7 @@ sub _colourise_msg {
     $out .= _colourise_snippet($1, $COLOUR{uri}, report_colours => $report_colours),
       redo TOKEN
         if $msg =~ m/\G($RE{URI}\s*)/gc;
-    $out .= _colourise_snippet($1, $COLOUR{$base_colour}, report_colours => $report_colours),
+    $out .= _colourise_snippet($1, $COLOUR{$msg_colour}, report_colours => $report_colours),
       redo TOKEN
         if $msg =~ m/\G(\S+\s*)/gc;
   }
@@ -97,22 +101,22 @@ sub colourise {
       my $username = $2;
       $msg = $3;
       if ($username eq $mb_username) {
-        _colourise_msg( $msg, base => 'mb_mine');
+        _colourise_msg( $msg, msg => 'mb_mine');
       }
       elsif ($msg =~ m/\@$mb_username\b/) {
-        _colourise_msg( $msg, base => 'mb_reply' );
+        _colourise_msg( $msg, msg => 'mb_reply' );
       }
       else {
-        _colourise_msg( $msg, base => 'mb_base' );
+        _colourise_msg( $msg, msg => 'mb_msg' );
       }
     }
     else {
-      _colourise_msg( $msg, base => 'mb_base' );
+      _colourise_msg( $msg, msg => 'mb_msg' );
     }
   }
   
   else {
-    _colourise_msg( $msg, base => 'im_base' );
+    _colourise_msg( $msg, msg => 'im_msg' );
   }
 
   print color 'reset';

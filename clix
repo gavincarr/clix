@@ -10,19 +10,22 @@ use Config::Std;
 use File::Basename;
 use AnyEvent;
 use AnyEvent::XMPP::Client;
-use Clix;
+
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use Clix::Colours qw(merge_colours colourise);
 
 use vars qw($VERSION);
-$VERSION = 0.002009;
+$VERSION = 0.003;
 
 sub usage {
   die "usage: " . basename($0) . " [-n] [-v] [-u <user>]\n";
 }
 
-my ($user, @ignore_user, $help, $noop, $verbose);
+my (@user, @ignore_user, $help, $noop, $verbose);
 usage 
   unless GetOptions(
-    'user|u=s'    => \$user,
+    'user|u=s@'   => \@user,
     'ignore-user|ignore|U=s@' => \@ignore_user,
     'help|h'      => \$help,
     'noop|n'      => \$noop,
@@ -35,22 +38,27 @@ die "Missing \$ENV{HOME}/.clixrc file\n" unless -f "$ENV{HOME}/.clixrc";
 read_config "$ENV{HOME}/.clixrc" => my %config;
 die "Error reading \$ENV{HOME}/.clixrc: $!" unless keys %config;
 
-# Use DEFAULTS user if defined, otherwise connect to all defined accounts
-my %ignore_user = map { $_ => 1 } @ignore_user;
-$user ||= $config{DEFAULTS}{user};
-if ($user) {
-  $user = [ $user ] unless ref $user;
-} else {
-  $user = [ grep { ! exists $ignore_user{$_} } grep !/^(DEFAULTS)$/, sort keys %config ];
+if (my $user_colours = $config{COLOURS} || $config{COLORS}) {
+  merge_colours($user_colours);
 }
-#printf "+ user accounts: %s\n", join(', ', @$user);
+
+# Use DEFAULTS user if defined, otherwise connect to all defined accounts
+my %user = map { $_ => 1 } @user;
+my %ignore_user = map { $_ => 1 } @ignore_user;
+@user = $config{DEFAULTS}{user} 
+  if ! @user;
+@user = grep { ! exists $ignore_user{$_} } grep !/^(DEFAULTS)$/, sort keys %config
+  if ! @user;
+#printf "+ user accounts: %s\n", join(', ', @user);
 
 # Setup short jid mappings
 my @map = ();
 push @map, ref $config{DEFAULTS}{map} ? @{$config{DEFAULTS}{map}} : $config{DEFAULTS}{map}
   if $config{DEFAULTS}{map};
-push @map, ref $config{$user}{map} ? @{$config{$user}{map}} : $config{$user}{map}
-  if $config{$user}{map};
+for (@user) {
+  push @map, ref $config{$_}{map} ? @{$config{$_}{map}} : $config{$_}{map}
+    if $config{$_}{map};
+}
 my %map = map { split /\s*:\s*/, $_, 2 } @map;
 print STDERR "+ mappings:\n" . join("\n", map { "  $_: $map{$_}" } keys %map) . "\n"
   if keys %map && $verbose;
@@ -73,7 +81,7 @@ my $j = AnyEvent->condvar;
 my $c = AnyEvent::XMPP::Client->new;
 
 # Add accounts
-for ( @$user ) {
+for ( @user ) {
   my $jid  = $config{$_}{user};
   my $pass = $config{$_}{pass};
   my $priority = $config{$_}{priority} || $config{DEFAULTS}{priority} || 10;
@@ -155,8 +163,11 @@ $c->reg_cb (
       my $bare_jid = $jid;
       $bare_jid =~ s!/ [^/]+$ !!x;
       my $mapped_jid = $map{ $bare_jid } || $bare_jid;
-      colourise( $body, jid => $bare_jid, mapped_jid => $mapped_jid, 
-        mb_username => $microblog{ $bare_jid } );
+      colourise( $body, 
+        jid             => $bare_jid, 
+        mapped_jid      => $mapped_jid, 
+        mb_username     => $microblog{ $bare_jid },
+      );
    }
 );
 $c->start;
@@ -175,17 +186,17 @@ clix - a read-only command-line XMPP client
 
 =head1 SYNOPSIS
 
-    clix [-u <user>]
+    clix [-v] [-u <section>] [--ignore <section>]
 
 =head1 DESCRIPTION
 
 clix is a read-only command-line XMPP client. It is intended for simple
 merging/monitoring tasks, such as following twitter and RSS feeds via XMPP.
 
-=head2 CONFIGURATION
+=head1 CONFIGURATION
 
 clix requires a config file called .clixrc on your home directory, 
-containing a set of jabber accounts to connect to. This is just an 
+containing a set of jabber/xmpp accounts to connect to. This is just an 
 ini-style config like the following:
 
     [gavin1]
@@ -200,12 +211,76 @@ ini-style config like the following:
     user = somethingelse@gmail.com
     pass = password3
 
-By default, clix tries to connect to all accounts. You can restrict to just
-a single account by specifying a user section name via '-u' e.g.
+By default, clix tries to connect to all accounts. You can restrict to particular
+accounts by specifying one or more user section names with '-u' e.g.
 
-    clix -u gavin1
+    clix -u gavin1 -u jabber
 
-for the example above.
+for the example above. Or you can ignore individual accounts using one or 
+more --ignore parameters e.g.
+
+    clix --ignore google
+
+=head2 DEFAULTS SECTION
+=head2 COLOURS SECTION
+
+In addition, clix allows you to customise the colours used for output by defining
+a [COLOURS] section (or [COLORS], if you prefer) in your config file. The current
+defaults are:
+
+    [COLOURS]
+    timestamp = white
+    from_jid = cyan
+    mb_sender = yellow
+    im_msg = green
+    mb_msg = green
+    mb_reply = red bold
+    mb_mine = white bold
+    uri = red
+    person = cyan
+    hashtag = magenta
+    group = magenta
+
+Values are any combination of attributes and colours that make sense to 
+L<Term::ANSIColor>. The colour keys are the following:
+
+=over 4
+
+=item timestamp
+
+The current timestamp, output at the beginning of the line.
+
+=item from_jid
+
+The JID (sender jabber ID) of the message. For microblog (twitter/identica etc.) messages,
+this is the microblog jabber account user, rather than the end user who sent the message.
+
+=item mb_sender
+
+For microblog (twitter, identica, etc.) messages, the microblog sender - the end user who
+sent the message.
+
+=item im_msg
+
+The message text colour of IM messages.
+
+=item mb_msg
+
+The message text colour of microblog (twitter, identica etc.) messages.
+
+=item mb_reply
+
+=item mb_mine
+
+=item uri
+
+=item person
+
+=item hashtag
+
+=item group
+
+=back
 
 =head1 AUTHOR
 

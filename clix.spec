@@ -3,7 +3,7 @@
 
 Summary: A read-only command-line xmpp client
 Name: clix
-Version: 0.002009
+Version: 0.003
 Release: 1%{org_tag}
 Group: System Environment/Daemons
 License: GPL
@@ -43,6 +43,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc README
 
 %changelog
+* Wed Jan 13 2010 Gavin Carr <gavin@openfusion.com.au> 0.003-1
+- Merge config [COLOURS] section before colourising messages.
+- Rename Clix module to Clix::Colours.
+
 * Mon Dec 01 2008 Gavin Carr <gavin@openfusion.com.au> 0.002-1
 - Make colourisation more sophisticated, esp. with microblogging messages.
 - Split colourisation functions into separate Clix module.
