@@ -22,7 +22,8 @@ sub usage {
   die "usage: " . basename($0) . " [-n] [-v] [-u <user>]\n";
 }
 
-my (@user, @ignore_user, $help, $noop, $verbose);
+my (@user, @ignore_user, $help, $noop);
+my $verbose = 0;
 usage 
   unless GetOptions(
     'user|u=s@'   => \@user,
@@ -43,13 +44,14 @@ if (my $user_colours = $config{COLOURS} || $config{COLORS}) {
 }
 
 # Use DEFAULTS user if defined, otherwise connect to all defined accounts
-my %user = map { $_ => 1 } @user;
 my %ignore_user = map { $_ => 1 } @ignore_user;
-@user = $config{DEFAULTS}{user} 
-  if ! @user;
+@user = ( $config{DEFAULTS}{user} ) 
+  if ! @user && $config{DEFAULTS}{user};
 @user = grep { ! exists $ignore_user{$_} } grep !/^(DEFAULTS)$/, sort keys %config
   if ! @user;
 #printf "+ user accounts: %s\n", join(', ', @user);
+die "No user accounts found to use - aborting\n" 
+  if ! @user;
 
 # Setup short jid mappings
 my @map = ();
@@ -86,6 +88,7 @@ for ( @user ) {
   my $pass = $config{$_}{pass};
   my $priority = $config{$_}{priority} || $config{DEFAULTS}{priority} || 10;
   next unless $jid && $pass;
+  print "+ adding account $jid\n" if $verbose;
   $c->add_account( $jid, $pass, undef, undef, 
     { resource => 'clix', initial_presence => $priority });
 }
@@ -129,10 +132,10 @@ $c->reg_cb (
       my ($c, $acc, $err) = @_;
       print "MessageError: " . $err->string . "\n";
    },
-#  error => sub {
-#     my ($c, $acc, $err) = @_;
-#     print "Error: " . $err->string . "\n";
-#  },
+   error => sub {
+      my ($c, $acc, $err) = @_;
+      print "Error: " . $err->string . "\n";
+   },
    contact_request_subscribe => sub {
       my ($c, $acc, $roster, $contact) = @_;
       printf "RequestSubscribe: %s->%s, current %s\n", 
@@ -170,6 +173,7 @@ $c->reg_cb (
       );
    }
 );
+print "+ initiating connections\n" if $verbose;
 $c->start;
 $j->wait;
 
