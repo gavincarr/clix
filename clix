@@ -9,11 +9,11 @@ use Getopt::Long qw(:config no_ignore_case bundling);
 use Config::Std;
 use File::Basename;
 use AnyEvent;
-use Net::XMPP2::Client;
+use AnyEvent::XMPP::Client;
 use Clix;
 
 use vars qw($VERSION);
-$VERSION = 0.002005;
+$VERSION = 0.002009;
 
 sub usage {
   die "usage: " . basename($0) . " [-n] [-v] [-u <user>]\n";
@@ -70,7 +70,7 @@ exit 0 if $noop;
 # Initial Setup
 $SIG{INT} = \&disconnect;
 my $j = AnyEvent->condvar;
-my $c = Net::XMPP2::Client->new;
+my $c = AnyEvent::XMPP::Client->new;
 
 # Add accounts
 for ( @$user ) {
@@ -180,8 +180,7 @@ clix - a read-only command-line XMPP client
 =head1 DESCRIPTION
 
 clix is a read-only command-line XMPP client. It is intended for simple
-merging/monitoring tasks, such as following twitter and RSS feeds via 
-XMPP.
+merging/monitoring tasks, such as following twitter and RSS feeds via XMPP.
 
 =head2 CONFIGURATION
 
@@ -214,7 +213,7 @@ Gavin Carr <gavin@openfusion.com.au>
 
 =head1 LICENSE
 
-Copyright 2007-2008 Open Fusion Pty. Ltd.
+Copyright 2007-2010 Open Fusion Pty. Ltd.
 
 This program is free software, licensed under the terms of the GNU
 General Public License v2.
