@@ -27,7 +27,7 @@ my %COLOUR = (
   uri           => 'red',
   person        => 'cyan',
   hashtag       => 'magenta',
-  group         => 'magenta',
+  group         => 'yellow',
 );
 
 sub merge_colours {
