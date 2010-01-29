@@ -94,7 +94,6 @@ sub colourise {
 
   # If this is a microblog account, we jump through special hoops
   if ($mb_username) {
-#   if ($msg =~ m/^((?:([-\w]+:|<[-\w]+)>)\s*)(.*?)$/s) {
     if ($msg =~ m/^\s*(\S+)\s+(.*?)$/s) {
       my $first_chunk = $1;
       my $rest = $2;

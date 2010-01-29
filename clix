@@ -162,10 +162,15 @@ $c->reg_cb (
       my ($c, $acc, $msg) = @_;
       my $body = $msg->any_body || return;
       chomp $body;
+
       my $jid = $msg->from;
       my $bare_jid = $jid;
       $bare_jid =~ s!/ [^/]+$ !!x;
       my $mapped_jid = $map{ $bare_jid } || $bare_jid;
+
+      # Strip annoying newlines from microblog messages
+      $body =~ s/[\r\n]+/ /g if $microblog{ $bare_jid };
+      
       Clix::Colours::colourise( $body, 
         jid             => $bare_jid, 
         mapped_jid      => $mapped_jid, 
