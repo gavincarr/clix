@@ -3,7 +3,7 @@
 
 Summary: A read-only command-line xmpp client
 Name: clix
-Version: 0.3.1
+Version: 0.3.2
 Release: 1%{org_tag}
 Group: System Environment/Daemons
 License: GPL

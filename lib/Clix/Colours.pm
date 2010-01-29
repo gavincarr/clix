@@ -104,7 +104,7 @@ sub colourise {
         $username = $1;
         $msg = $rest;
         print color $COLOUR{mb_sender};
-        print "$first_chunk ";
+        print "$username: ";
       }
 
       if ($username eq $mb_username) {
