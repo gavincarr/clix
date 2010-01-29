@@ -75,8 +75,7 @@ sub _colourise_msg {
         if $msg =~ m/\G(\S+\s*)/gc;
   }
  
-  return $out if $report_colours;
-  print $out;
+  return $out;
 }
 
 # Colourise and print a given message
@@ -95,28 +94,37 @@ sub colourise {
 
   # If this is a microblog account, we jump through special hoops
   if ($mb_username) {
-    if ($msg =~ m/^(([-\w]+):\s*)(.*?)$/s) {
-      print color $COLOUR{mb_sender};
-      print $1;
-      my $username = $2;
-      $msg = $3;
+#   if ($msg =~ m/^((?:([-\w]+:|<[-\w]+)>)\s*)(.*?)$/s) {
+    if ($msg =~ m/^\s*(\S+)\s+(.*?)$/s) {
+      my $first_chunk = $1;
+      my $rest = $2;
+      my $username = '';
+
+      if ($first_chunk =~ m/^([-\w]+):$/ ||
+          $first_chunk =~ m/^<([-\w]+)>$/) {
+        $username = $1;
+        $msg = $rest;
+        print color $COLOUR{mb_sender};
+        print "$first_chunk ";
+      }
+
       if ($username eq $mb_username) {
-        _colourise_msg( $msg, msg => 'mb_mine');
+        print _colourise_msg( $msg, msg => 'mb_mine');
       }
       elsif ($msg =~ m/\@$mb_username\b/) {
-        _colourise_msg( $msg, msg => 'mb_reply' );
+        print _colourise_msg( $msg, msg => 'mb_reply' );
       }
       else {
-        _colourise_msg( $msg, msg => 'mb_msg' );
+        print _colourise_msg( $msg, msg => 'mb_msg' );
       }
     }
     else {
-      _colourise_msg( $msg, msg => 'mb_msg' );
+      print _colourise_msg( $msg, msg => 'mb_msg' );
     }
   }
   
   else {
-    _colourise_msg( $msg, msg => 'im_msg' );
+    print _colourise_msg( $msg, msg => 'im_msg' );
   }
 
   print color 'reset';

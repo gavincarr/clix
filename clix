@@ -13,7 +13,7 @@ use AnyEvent::XMPP::Client;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Clix::Colours qw(merge_colours colourise);
+use Clix::Colours;
 
 use vars qw($VERSION);
 $VERSION = 0.003;
@@ -40,7 +40,7 @@ read_config "$ENV{HOME}/.clixrc" => my %config;
 die "Error reading \$ENV{HOME}/.clixrc: $!" unless keys %config;
 
 if (my $user_colours = $config{COLOURS} || $config{COLORS}) {
-  merge_colours($user_colours);
+  Clix::Colours::merge_colours($user_colours);
 }
 
 # Use DEFAULTS user if defined, otherwise connect to all defined accounts
@@ -166,7 +166,7 @@ $c->reg_cb (
       my $bare_jid = $jid;
       $bare_jid =~ s!/ [^/]+$ !!x;
       my $mapped_jid = $map{ $bare_jid } || $bare_jid;
-      colourise( $body, 
+      Clix::Colours::colourise( $body, 
         jid             => $bare_jid, 
         mapped_jid      => $mapped_jid, 
         mb_username     => $microblog{ $bare_jid },
