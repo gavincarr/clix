@@ -16,7 +16,7 @@ use lib "$FindBin::Bin/lib";
 use Clix::Colours;
 
 use vars qw($VERSION);
-$VERSION = 0.003002;
+$VERSION = 0.003003;
 
 sub usage {
   die "usage: " . basename($0) . " [-n] [-v] [-u <user>]\n";
@@ -169,7 +169,7 @@ $c->reg_cb (
       my $mapped_jid = $map{ $bare_jid } || $bare_jid;
 
       # Strip annoying newlines from microblog messages
-      $body =~ s/[\r\n]+/ /g if $microblog{ $bare_jid };
+      $body =~ s/\s\s+/ /g if $microblog{ $bare_jid };
       
       Clix::Colours::colourise( $body, 
         jid             => $bare_jid, 
