@@ -3,7 +3,7 @@
 
 Summary: A read-only command-line xmpp client
 Name: clix
-Version: 0.3.3
+Version: 0.3.4
 Release: 1%{org_tag}
 Group: System Environment/Daemons
 License: GPL
@@ -43,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc README
 
 %changelog
+* Tue Feb 02 2010 Gavin Carr <gavin@openfusion.com.au> 0.3.4-1
+- Tweaks to newline stripping.
+
 * Fri Jan 29 2010 Gavin Carr <gavin@openfusion.com.au> 0.3.1-1
 - Tweak colourising to handle twitter-style <usernames>.
 - Strip newlines from microblog messages.
