@@ -1,11 +1,10 @@
-
-%define perl_sitelib /usr/lib/perl5/site_perl
+%define perl_sitelib    %(eval "`perl -V:installsitelib`"; echo $installsitelib)
 
 Summary: A read-only command-line xmpp client
 Name: clix
-Version: 0.3.4
+Version: 0.3.5
 Release: 1%{org_tag}
-Group: System Environment/Daemons
+Group: Applications/Internet
 License: GPL
 URL: http://www.openfusion.com.au/labs/
 Source: http://www.openfusion.com.au/labs/dist/%{name}-%{version}.tar.gz
@@ -43,6 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc README
 
 %changelog
+* Thu Jan 13 2011 Gavin Carr <gavin@openfusion.com.au> 0.3.5-1
+- Tweak perl_sitelib setting to work in {RHEL,CentOS}-6.
+
 * Tue Feb 02 2010 Gavin Carr <gavin@openfusion.com.au> 0.3.4-1
 - Tweaks to newline stripping.
 
