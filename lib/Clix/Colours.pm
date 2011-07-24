@@ -11,7 +11,7 @@ use Exporter;
 use Term::ANSIColor;
 use Time::Piece;
 use Carp;
-use Regexp::Common qw(URI);
+use Regexp::Common qw(URI microsyntax);
 
 our @EXPORT = ();
 our @EXPORT_OK = qw(merge_colours colourise);
@@ -60,19 +60,22 @@ sub _colourise_msg {
   TOKEN: {
     $out .= _colourise_snippet($1, $COLOUR{person}, report_colours => $report_colours),
       redo TOKEN
-        if $msg =~ m/\G(\@#?[-\w]+\s*)/gc;
+        if $msg =~ m/\G($RE{microsyntax}{user} \s* )/gcx;
+#       if $msg =~ m/\G(\@#?[-\w]+\s*)/gc;
     $out .= _colourise_snippet($1, $COLOUR{hashtag}, report_colours => $report_colours),
       redo TOKEN
-        if $msg =~ m/\G(\#[-\w.]+\s*)/gc;
+        if $msg =~ m/\G( $RE{microsyntax}{hashtag} \s* )/gcx;
+#       if $msg =~ m/\G(\#[-\w.]+\s*)/gc;
     $out .= _colourise_snippet($1, $COLOUR{group}, report_colours => $report_colours),
       redo TOKEN
-        if $msg =~ m/\G(![-\w.]+\s*)/gc;
+        if $msg =~ m/\G( $RE{microsyntax}{grouptag} \s* )/gcx;
+#       if $msg =~ m/\G(![-\w.]+\s*)/gc;
     $out .= _colourise_snippet($1, $COLOUR{uri}, report_colours => $report_colours),
       redo TOKEN
-        if $msg =~ m/\G($RE{URI}\s*)/gc;
+        if $msg =~ m/\G( $RE{URI} \s* )/gcx;
     $out .= _colourise_snippet($1, $COLOUR{$msg_colour}, report_colours => $report_colours),
       redo TOKEN
-        if $msg =~ m/\G(\S+\s*)/gc;
+        if $msg =~ m/\G( \S+ \s* )/gcx;
   }
  
   return $out;
