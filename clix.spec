@@ -2,8 +2,8 @@
 
 Summary: A read-only command-line xmpp client
 Name: clix
-Version: 0.3.5
-Release: 1%{org_tag}
+Version: 0.4
+Release: 1%{org_tag}%{dist}
 Group: Applications/Internet
 License: GPL
 URL: http://www.openfusion.com.au/labs/
@@ -42,6 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc README
 
 %changelog
+* Sun Jul 24 2011 Gavin Carr <gavin@openfusion.com.au> 0.4-1
+- Update to use new Regexp::Common::microsyntax.
+
 * Thu Jan 13 2011 Gavin Carr <gavin@openfusion.com.au> 0.3.5-1
 - Tweak perl_sitelib setting to work in {RHEL,CentOS}-6.
 
