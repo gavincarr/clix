@@ -14,6 +14,7 @@ use AnyEvent::XMPP::Client;
 use FindBin qw($Bin);
 use lib "$Bin/lib";
 use Clix::Colours;
+use Clix::Utils;
 
 use vars qw($VERSION);
 $VERSION = 0.003004;
@@ -22,16 +23,15 @@ sub usage {
   die "usage: " . basename($0) . " [-n] [-v] [-u <user>]\n";
 }
 
-my (@user, @ignore_user, $help, $noop);
 my $verbose = 0;
-usage 
-  unless GetOptions(
-    'help|h'                    => \$help,
-    'noop|n'                    => \$noop,
-    'verbose|v+'                => \$verbose,
-    'user|u=s@'                 => \@user,
-    'ignore-user|ignore|U=s@'   => \@ignore_user,
-  );
+my ($help, $noop, @user, @ignore_user);
+usage unless GetOptions(
+  'help|h'                    => \$help,
+  'verbose|v+'                => \$verbose,
+  'noop|n'                    => \$noop,
+  'user|u=s@'                 => \@user,
+  'ignore-user|ignore|U=s@'   => \@ignore_user,
+);
 
 usage() if $help;
 usage() if @ARGV;
@@ -63,7 +63,7 @@ for (@user) {
 }
 my %map = map { split /\s*:\s*/, $_, 2 } @map;
 print STDERR "+ mappings:\n" . join("\n", map { "  $_: $map{$_}" } keys %map) . "\n"
-  if keys %map && $verbose;
+  if keys %map && $verbose >= 2;
 
 # Setup microblog jids
 my @microblog = ();
@@ -73,7 +73,7 @@ push @microblog, ref $config{DEFAULTS}{microblog} ?
     if $config{DEFAULTS}{microblog};
 my %microblog = map { split /\s*:\s*/, $_, 2 } @microblog;
 print STDERR "+ microblogs:\n" . join("\n", map { "  $_: $microblog{$_}" } keys %microblog) . "\n"
-  if keys %microblog && $verbose;
+  if keys %microblog && $verbose >= 2;
 
 exit 0 if $noop;
 
@@ -104,7 +104,7 @@ $c->reg_cb (
       printf "Connected: %s\n", $acc->bare_jid
         if $verbose || ! $connected{$acc->bare_jid};
       $connected{$acc->bare_jid} ||= 1;
-      if ($verbose >= 2) {
+      if ($verbose >= 3) {
         my $roster = $acc->connection->get_roster;
         $roster->debug_dump;
       }
@@ -122,19 +122,19 @@ $c->reg_cb (
    },
    roster_error => sub {
       my ($c, $acc, $err) = @_;
-      print "RosterError: " . $err->string . "\n";
+      print "RosterError: " . $err->string . "\n" if $verbose;
    },
    presence_error => sub {
       my ($c, $acc, $err) = @_;
-      print "PresenceError: " . $err->string . "\n";
+      print "PresenceError: " . $err->string . "\n" if $verbose;
    },
    message_error => sub {
       my ($c, $acc, $err) = @_;
-      print "MessageError: " . $err->string . "\n";
+      print "MessageError: " . $err->string . "\n" if $verbose;
    },
    error => sub {
       my ($c, $acc, $err) = @_;
-      print "Error: " . $err->string . "\n";
+      print "Error: " . $err->string . "\n" if $verbose;
    },
    contact_request_subscribe => sub {
       my ($c, $acc, $roster, $contact) = @_;
@@ -165,18 +165,15 @@ $c->reg_cb (
 
       my $jid = $msg->from;
       my $bare_jid = $jid;
-      $bare_jid =~ s!/ [^/]+$ !!x;
+      $bare_jid =~ s! / [^/]+$ !!x;
       my $mapped_jid = $map{ $bare_jid } || $bare_jid;
 
       # Strip annoying newlines from microblog messages
-      if ($microblog{ $bare_jid }) {
-        1 while $body =~ s/\s\s+/ /g;
-      }
+      $body =~ s/\s\s+/ /g if $microblog{ $bare_jid };
       
-      Clix::Colours::colourise( $body, 
-        jid             => $bare_jid, 
-        mapped_jid      => $mapped_jid, 
-        mb_username     => $microblog{ $bare_jid },
+      print_msg($body,
+        mapped_jid  => $mapped_jid,
+        mb_username => $microblog{ $bare_jid },
       );
    }
 );
