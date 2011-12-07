@@ -60,22 +60,19 @@ sub _colourise_msg {
   TOKEN: {
     $out .= _colourise_snippet($1, $COLOUR{person}, report_colours => $report_colours),
       redo TOKEN
-        if $msg =~ m/\G($RE{microsyntax}{user} \s* )/gcx;
-#       if $msg =~ m/\G(\@#?[-\w]+\s*)/gc;
+        if $msg =~ m/\G( $RE{microsyntax}{user} \s* )/gcx;
     $out .= _colourise_snippet($1, $COLOUR{hashtag}, report_colours => $report_colours),
       redo TOKEN
         if $msg =~ m/\G( $RE{microsyntax}{hashtag} \s* )/gcx;
-#       if $msg =~ m/\G(\#[-\w.]+\s*)/gc;
     $out .= _colourise_snippet($1, $COLOUR{group}, report_colours => $report_colours),
       redo TOKEN
         if $msg =~ m/\G( $RE{microsyntax}{grouptag} \s* )/gcx;
-#       if $msg =~ m/\G(![-\w.]+\s*)/gc;
     $out .= _colourise_snippet($1, $COLOUR{uri}, report_colours => $report_colours),
       redo TOKEN
         if $msg =~ m/\G( $RE{URI} \s* )/gcx;
     $out .= _colourise_snippet($1, $COLOUR{$msg_colour}, report_colours => $report_colours),
       redo TOKEN
-        if $msg =~ m/\G( \S+ \s* )/gcx;
+        if $msg =~ m/\G( (?: \S|\w+ ) \s* )/gcx;
   }
  
   return $out;
@@ -92,8 +89,10 @@ sub colourise {
   print color $COLOUR{timestamp};
   printf "%s ", localtime->strftime('%T');
 
-  print color $COLOUR{from_jid};
-  printf "[%s] ", $mapped_jid;
+  if ($mapped_jid) {
+    print color $COLOUR{from_jid};
+    printf "[%s] ", $mapped_jid;
+  }
 
   # If this is a microblog account, we jump through special hoops
   if ($mb_username) {
@@ -107,7 +106,7 @@ sub colourise {
         $username = $1;
         $msg = $rest;
         print color $COLOUR{mb_sender};
-        print "$username: ";
+        print "\@$username ";
       }
 
       if ($username eq $mb_username) {
