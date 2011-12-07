@@ -13,11 +13,7 @@ use AnyEvent::XMPP::Client;
 
 use FindBin qw($Bin);
 use lib "$Bin/lib";
-use Clix::Colours;
-use Clix::Utils;
-
-use vars qw($VERSION);
-$VERSION = 0.003004;
+use Clix::Utils qw(print_msg);
 
 sub usage {
   die "usage: " . basename($0) . " [-n] [-v] [-u <user>]\n";
