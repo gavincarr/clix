@@ -11,8 +11,8 @@ use File::Basename;
 use AnyEvent;
 use AnyEvent::XMPP::Client;
 
-use FindBin;
-use lib "$FindBin::Bin/lib";
+use FindBin qw($Bin);
+use lib "$Bin/lib";
 use Clix::Colours;
 
 use vars qw($VERSION);
@@ -26,11 +26,11 @@ my (@user, @ignore_user, $help, $noop);
 my $verbose = 0;
 usage 
   unless GetOptions(
-    'user|u=s@'   => \@user,
-    'ignore-user|ignore|U=s@' => \@ignore_user,
-    'help|h'      => \$help,
-    'noop|n'      => \$noop,
-    'verbose|v+'  => \$verbose,
+    'help|h'                    => \$help,
+    'noop|n'                    => \$noop,
+    'verbose|v+'                => \$verbose,
+    'user|u=s@'                 => \@user,
+    'ignore-user|ignore|U=s@'   => \@ignore_user,
   );
 
 usage() if $help;
