@@ -1,0 +1,15 @@
+---
+- text: May we present Adam Lisagor (\
+  type: im_msg
+- text: '@lonelysandwich'
+  type: person
+- text: ) in conversation with Merlin Mann (\
+  type: im_msg
+- text: '@hotdogsladies'
+  type: person
+- text: ') - '
+  type: im_msg
+- text: 'http://t.co/Cwse3c5m '
+  type: uri
+- text: '#webstock'
+  type: hashtag

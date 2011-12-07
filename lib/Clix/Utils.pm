@@ -23,8 +23,9 @@ our @EXPORT_OK = qw(
 # Return an array of tokens (hashrefs) for $msg
 sub tokenise_msg {
   my ($msg, $msg_type) = @_;
-  my @token;
+  $msg_type ||= 'im_msg';
 
+  my @token;
   TOKEN: {
     push(@token, { text => $1, type => 'person' }),     redo TOKEN
       if $msg =~ m/\G( $RE{microsyntax}{user} \s* )/gcx;
