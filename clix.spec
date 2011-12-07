@@ -2,7 +2,7 @@
 
 Summary: A read-only command-line xmpp client
 Name: clix
-Version: 0.4
+Version: 0.5
 Release: 1%{org_tag}%{dist}
 Group: Applications/Internet
 License: GPL
@@ -23,25 +23,29 @@ merging and monitoring.
 pod2man clix > README
 
 %install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{_bindir} 
-mkdir -p $RPM_BUILD_ROOT%{perl_sitelib}/Clix
-mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
-install clix $RPM_BUILD_ROOT%{_bindir}
-install -m644 lib/Clix/Colours.pm $RPM_BUILD_ROOT%{perl_sitelib}/Clix
-install -m644 README $RPM_BUILD_ROOT%{_mandir}/man1/clix.1
+rm -rf %{buildroot}
+mkdir -p %{buildroot}%{_bindir} 
+mkdir -p %{buildroot}%{perl_sitelib}/Clix
+mkdir -p %{buildroot}%{_mandir}/man1
+install clix %{buildroot}%{_bindir}
+install -m644 lib/Clix/*.pm %{buildroot}%{perl_sitelib}/Clix
+install -m644 README %{buildroot}%{_mandir}/man1/clix.1
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
 %{_bindir}/%{name}
-%{perl_sitelib}/Clix/Colours.pm
+%{perl_sitelib}/Clix/*.pm
 %{_mandir}/man1/%{name}.1*
 %doc README
 
 %changelog
+* Wed Dec 07 2011 Gavin Carr <gavin@openfusion.com.au> 0.5-1
+- Debug/fix tokenising issues.
+- Refactor Clix::Colour into cleaner Colour and Utils modules.
+
 * Sun Jul 24 2011 Gavin Carr <gavin@openfusion.com.au> 0.4-1
 - Update to use new Regexp::Common::microsyntax.
 
