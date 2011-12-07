@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Simple read-only command-line XMPP client
+# Read-only command-line XMPP client
 #
 
 use strict;
@@ -196,6 +196,10 @@ clix - a read-only command-line XMPP client
 
 clix is a read-only command-line XMPP client. It is intended for simple
 merging/monitoring tasks, such as following twitter and RSS feeds via XMPP.
+
+It supports monitoring and merging messages from multiple accounts, and
+colourised formatting of microblog messages, user, hashtag, uri, and grouptag
+elements.
 
 =head1 CONFIGURATION
 
