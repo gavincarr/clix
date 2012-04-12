@@ -1,12 +1,12 @@
 #!/usr/bin/perl
 #
-# Read-only command-line XMPP client
+# Simple read-only command-line XMPP client
 #
 
 use strict;
 
 use Getopt::Long qw(:config no_ignore_case bundling);
-use Config::Std;
+use Config::IniFiles;
 use File::Basename;
 use AnyEvent;
 use AnyEvent::XMPP::Client;
@@ -32,7 +32,7 @@ usage unless GetOptions(
 usage() if $help;
 usage() if @ARGV;
 die "Missing \$ENV{HOME}/.clixrc file\n" unless -f "$ENV{HOME}/.clixrc";
-read_config "$ENV{HOME}/.clixrc" => my %config;
+tie my %config, 'Config::IniFiles', -file => "$ENV{HOME}/.clixrc";
 die "Error reading \$ENV{HOME}/.clixrc: $!" unless keys %config;
 
 if (my $user_colours = $config{COLOURS} || $config{COLORS}) {
@@ -196,10 +196,6 @@ clix - a read-only command-line XMPP client
 
 clix is a read-only command-line XMPP client. It is intended for simple
 merging/monitoring tasks, such as following twitter and RSS feeds via XMPP.
-
-It supports monitoring and merging messages from multiple accounts, and
-colourised formatting of microblog messages, user, hashtag, uri, and grouptag
-elements.
 
 =head1 CONFIGURATION
 
