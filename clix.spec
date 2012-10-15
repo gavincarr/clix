@@ -2,7 +2,7 @@
 
 Summary: A read-only command-line xmpp client
 Name: clix
-Version: 0.5.1
+Version: 0.5.2
 Release: 1%{org_tag}%{dist}
 Group: Applications/Internet
 License: GPL
@@ -10,6 +10,7 @@ URL: http://www.openfusion.com.au/labs/
 Source: http://www.openfusion.com.au/labs/dist/%{name}-%{version}.tar.gz
 BuildRoot: /var/tmp/%{name}-root
 BuildRequires: /usr/bin/pod2man
+Requires: perl(Regexp::Common::microsyntax)
 BuildArch: noarch
 
 %description
@@ -42,6 +43,9 @@ rm -rf %{buildroot}
 %doc README
 
 %changelog
+* Thu Apr 12 2012 Gavin Carr <gavin@openfusion.com.au> 0.5.2-1
+- Update to version 0.5.2.
+
 * Wed Dec 07 2011 Gavin Carr <gavin@openfusion.com.au> 0.5-1
 - Debug/fix tokenising issues.
 - Refactor Clix::Colour into cleaner Colour and Utils modules.
