@@ -2,7 +2,7 @@
 
 Summary: A read-only command-line xmpp client
 Name: clix
-Version: 0.5.2
+Version: 0.5.3
 Release: 1%{org_tag}%{dist}
 Group: Applications/Internet
 License: GPL
@@ -43,6 +43,9 @@ rm -rf %{buildroot}
 %doc README
 
 %changelog
+* Mon Oct 15 2012 Gavin Carr <gavin@openfusion.com.au> 0.5.3-1
+- Tweak Clix::Utils ublog message handling to allow preset sources.
+
 * Thu Apr 12 2012 Gavin Carr <gavin@openfusion.com.au> 0.5.2-1
 - Update to version 0.5.2.
 
