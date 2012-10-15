@@ -67,23 +67,19 @@ sub prep_msg {
   my $mb_username = $opts{mb_username};
   my $msg_type;
 
-  my @output;
-  push @output, { text => localtime->strftime('%T '), type => 'timestamp' };
-  push @output, { text => "[$mapped_jid] ", type => 'from_jid' } if $mapped_jid;
-
-  # Parse out leading username on microblog messages
+  # Parse out leading source and/or username on microblog messages
+  my $source = '';
+  my $username = '';
   if ($mb_username) {
-    my $username = '';
-    if ($msg =~ m/^\s*(\S+)\s+(.*?)$/s) {
-      my $first_chunk = $1;
-      my $rest = $2;
+    if ($msg =~ m/^\s* (?:(\[\w+\])\s+)? (\S+)\s+ (.*?)$/sx) {
+      $source      = $1 if $1;
+      my $chunk1   = $2;
+      my $rest     = $3;
       $username = '';
 
-      if ($first_chunk =~ m/^ ([-\w]+):$/x ||
-          $first_chunk =~ m/^<([-\w]+)>$/x) {
+      if ($chunk1 =~ m/^ ([-\w]+):$/x || $chunk1 =~ m/^<([-\w]+)>$/x) {
         $username = $1;
         $msg = $rest;
-        push @output, { text => "\@$username ", type => 'mb_sender' };
       }
     }
 
@@ -102,6 +98,16 @@ sub prep_msg {
     $msg_type = 'im_msg';
   }
 
+  my @output;
+
+  push @output, { text => localtime->strftime('%T '), type => 'timestamp' };
+  if ($source) {
+    push @output, { text => "$source ", type => 'from_jid' };
+  }
+  elsif ($mapped_jid) {
+    push @output, { text => "[$mapped_jid] ", type => 'from_jid' };
+  }
+  push @output, { text => "\@$username ", type => 'mb_sender' } if $username;
   push @output, tokenise_msg($msg, $msg_type);
 
   return @output;
